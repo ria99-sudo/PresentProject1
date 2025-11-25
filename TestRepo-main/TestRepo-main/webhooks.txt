@@ -1,0 +1,95 @@
+WEEK 11 – Jenkins CICD + GitHub Webhooks + Email Notifications + UML Tasks
+
+SETTING UP JENKINS CI WITH GITHUB WEBHOOK
+
+Step 1 Configure Webhook in GitHub
+• Go to your GitHub repository.
+• Go to Settings → Webhooks → Add Webhook.
+• Payload URL format httpjenkins-server-urlgithub-webhook
+• If Jenkins is running on localhost, expose it using ngrok.
+• Command to expose Jenkins
+    ngrok.exe http 8080
+• Use the generated HTTPS URL such as
+    httpsexample.ngrok-free.devgithub-webhook
+• Content type applicationjson
+• Select “Just the push event”
+• Click Add Webhook.
+
+Step 2 Configure Jenkins to Accept GitHub Webhooks
+• Open Jenkins → select your job → Configure.
+• In Build Triggers section, enable
+    GitHub hook trigger for GITScm polling
+• Click Save.
+
+Step 3 Test Webhook
+• Make a code change locally.
+• Push to GitHub.
+• Jenkins should automatically start the build.
+
+Outcome
+• GitHub → Jenkins automation enabled.
+
+---------------------------------------------------------
+SETTING UP NGROK
+
+Step 1 Download ngrok from httpsngrok.comdownload
+
+Step 2 Add authtoken (optional but recommended)
+Command
+    ngrok config add-authtoken your_token
+
+Step 3 Start Jenkins tunnel
+Command
+    ngrok http 8080
+
+Step 4 Use generated URL in GitHub webhook
+    httpsngrok-id.ngrok-free.devgithub-webhook
+
+---------------------------------------------------------
+JENKINS EMAIL NOTIFICATION (GMAIL APP PASSWORD)
+
+1. Generate App Password
+• Go to httpsmyaccount.google.com
+• Enable 2-Step Verification.
+• Go to Security → App Passwords.
+• Select “Other (Custom Name)” → Jenkins-Demo.
+• Copy the 16-digit app password.
+
+2. Install Required Jenkins Plugin
+• Jenkins Dashboard → Manage Jenkins → Manage Plugins.
+• Install Email Extension Plugin.
+
+3. Configure Jenkins Global Email Settings
+• Jenkins → Manage Jenkins → Configure System.
+
+Under E-mail Notification
+• SMTP Server smtp.gmail.com
+• Use SMTP Authentication ENABLED
+• Username your-gmail
+• Password your-16-digit-app-password
+• Use SSL ENABLED
+• SMTP Port 465
+• Reply-To your-gmail
+
+Under Extended E-mail Notification
+• SMTP Server smtp.gmail.com
+• SMTP Port 465
+• SSL ENABLED
+• Add Gmail credentials
+• Default content type texthtml
+
+Test Email from Jenkins
+• Click “Test configuration”.
+
+4. Configure Email in a Jenkins Job
+• Job → Configure → Post-build Actions → Editable Email Notification.
+• Add recipients.
+• Choose triggers (Failure, Success, etc.)
+• Save.
+
+---------------------------------------------------------
+ALL COMMANDS USED IN WEEK 11 (GIVEN TOGETHER)
+
+ngrok.exe http 8080
+ngrok config add-authtoken your_token
+ngrok http 8080

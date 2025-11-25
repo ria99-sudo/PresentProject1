@@ -1,0 +1,202 @@
+Week 8: Jenkins Automation — Maven Java + Maven Web Projects
+
+Maven Java Automation — Steps
+
+Step 1: Open Jenkins (http://localhost:8080
+)
+→ Click New Item
+
+Step 2: Create Freestyle Project (MavenJava_Build)
+→ Enter project name
+→ Click OK
+→ Configure:
+
+Description: Java Build demo
+
+Source Code Management (SCM):
+
+Git repository URL: [GitMavenJava repo URL]
+
+Branch: */main or */master
+
+Build Steps:
+
+Add Build Step → Invoke top-level Maven targets
+
+Maven version: MAVEN_HOME
+
+Goals: clean
+
+Add Build Step → Invoke top-level Maven targets
+
+Maven version: MAVEN_HOME
+
+Goals: install
+
+Post-build Actions:
+
+Add Post Build Action → Archive the artifacts
+
+Files to archive: **/*
+
+Add Post Build Action → Build other projects
+
+Projects to build: MavenJava_Test
+
+Trigger: Only if build is stable
+→ Apply & Save
+
+Step 3: Create Freestyle Project (MavenJava_Test)
+→ Enter project name
+→ Click OK
+→ Configure:
+
+Description: Test demo
+
+Build Environment:
+
+Check: Delete workspace before build starts
+
+Add Build Step → Copy artifacts from another project:
+
+Project name: MavenJava_Build
+
+Build: Stable build only
+
+Artifacts to copy: **/*
+
+Add Build Step → Invoke top-level Maven targets:
+
+Maven version: MAVEN_HOME
+
+Goals: test
+
+Post-build Actions:
+
+Add Post Build Action → Archive the artifacts
+
+Files to archive: **/*
+→ Apply & Save
+
+Step 4: Create Pipeline View for Maven Java
+→ Click + beside "All"
+→ Name: MavenJava_Pipeline
+→ Select: Build pipeline view
+→ Pipeline Flow:
+
+Layout: Based on upstream/downstream
+
+Initial job: MavenJava_Build
+→ Apply & Save
+
+Step 5: Run the Pipeline
+→ Click RUN on pipeline
+→ Check console output
+→ Pipeline turns Green if successful
+→ MavenJava_Test runs automatically after MavenJava_Build
+
+Maven Web Automation — Steps
+
+Step 1: Open Jenkins
+→ Click New Item
+
+Step 2: Create Freestyle Project (MavenWeb_Build)
+→ Enter name
+→ Click OK
+→ Configure:
+
+Description: Web Build demo
+
+SCM: Git repo URL (GitMavenWeb repo)
+
+Branch: */main or */master
+
+Build Steps:
+
+Maven → clean
+
+Maven → install
+
+Post-build Actions:
+
+Archive artifacts → **/*
+
+Build other projects → MavenWeb_Test (only if stable)
+→ Apply & Save
+
+Step 3: Create Freestyle Project (MavenWeb_Test)
+→ Enter name
+→ OK
+→ Configure:
+
+Build Environment: Delete workspace
+
+Copy artifacts:
+
+From project: MavenWeb_Build
+
+Build: Stable build only
+
+Artifacts: **/*
+
+Maven test step:
+
+Maven version: MAVEN_HOME
+
+Goals: test
+
+Post-build Actions:
+
+Archive artifacts → **/*
+
+Build other projects → MavenWeb_Deploy
+→ Apply & Save
+
+Step 4: Create Freestyle Project (MavenWeb_Deploy)
+→ Enter name
+→ OK
+→ Configure:
+
+Build Environment: Delete workspace
+
+Copy artifacts:
+
+From project: MavenWeb_Test
+
+Build: Stable build only
+
+Artifacts: **/*
+
+Post-build Actions:
+
+Deploy WAR/EAR to Container:
+
+WAR/EAR File: **/*.war
+
+Context path: webpath
+
+Add container: Tomcat 9.x remote
+
+Credentials: admin / 1234
+
+Tomcat URL: http://localhost:8085/
+
+→ Apply & Save
+
+Step 5: Create Pipeline View (MavenWeb_Pipeline)
+→ Click +
+→ Name: MavenWeb_Pipeline
+→ Choose Build pipeline view
+→ Pipeline Flow:
+
+Layout: upstream/downstream
+
+Initial job: MavenWeb_Build
+→ Apply & Save
+
+Step 6: Run Pipeline
+→ Click RUN
+→ Check console
+→ If green: success
+→ Open Tomcat (localhost:8085)
+→ Click /webpath to view deployed application

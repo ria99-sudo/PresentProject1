@@ -1,0 +1,81 @@
+// 1st version
+minikube start --driver=docker
+
+kubectl create deployment nginx-deploy --image=nginx
+
+kubectl expose deployment nginx-deploy --type=NodePort --port=80 --name=nginx-service
+
+kubectl port-forward svc/nginx-service 8090:80
+
+kubectl get pods
+
+kubectl get svc
+
+
+
+
+
+// 2nd version
+
+# 1. Start Minikube
+minikube start --driver=docker
+
+# 2. Create working folder
+mkdir "C:\minikube-nginx"
+cd "C:\minikube-nginx"
+
+# 3. Copy your HTML file into this folder
+Copy-Item -Path "C:\Users\BHARGAVI KUMBHAM\OneDrive\Desktop\srini\index.html" -Destination "C:\minikube-nginx" -Force
+
+# 4. Create Dockerfile
+@'
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+'@ | Set-Content -Path Dockerfile -Encoding UTF8
+
+# 5. Point Docker CLI to Minikube Docker daemon
+minikube -p minikube docker-env --shell powershell | Invoke-Expression
+
+# 6. Build image inside Minikube
+docker build -t mynginx-image:latest .
+
+# 7. Verify image exists
+docker images
+
+# 8. Create deployment YAML
+kubectl create deployment nginx-deploy --image=mynginx-image:latest --dry-run=client -o yaml > nginx.yaml
+
+# 9. Edit YAML to force Kubernetes to use local image
+# (Adds imagePullPolicy: Never)
+# Open this in Notepad:
+notepad nginx.yaml
+# ---- MANUALLY EDIT the container section to include:
+# containers:
+# - name: mynginx-container
+#   image: mynginx-image:latest
+#   imagePullPolicy: Never
+# (Save and close Notepad)
+
+# 10. Apply deployment
+kubectl delete deployment nginx-deploy --ignore-not-found
+kubectl apply -f nginx.yaml
+
+# 11. Expose deployment as NodePort
+kubectl delete svc nginx-deploy --ignore-not-found
+kubectl expose deployment nginx-deploy --type=NodePort --port=80
+
+# 12. Check pod status
+kubectl get pods -o wide
+
+# 13. Check service status
+kubectl get svc nginx-deploy -o wide
+
+# 14. Get Minikube IP
+minikube ip
+
+# 15. Reliable working method: Port-forward the service to localhost
+kubectl port-forward svc/nginx-deploy 8080:80
+# Keep this terminal open
+
+# 16. Open in browser
+# http://127.0.0.1:8080
